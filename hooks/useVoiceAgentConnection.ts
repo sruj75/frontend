@@ -9,7 +9,7 @@ interface ConnectionDetails {
   roomName?: string;
 }
 
-export function useVoiceAgentConnection(): ConnectionDetails | undefined {
+export function useVoiceAgentConnection(): { details: ConnectionDetails | undefined; isLoading: boolean; error: string | null } {
   const [details, setDetails] = useState<ConnectionDetails | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +22,11 @@ export function useVoiceAgentConnection(): ConnectionDetails | undefined {
 
         // Make request to YOUR FastAPI server
         
+        // What's happening:
+        // fetch - Makes HTTP request to your FastAPI server
+        // POST method - Sending data (more secure than GET for auth)
+        // Headers - Tell server what type of data we're sending
+        // Body - The actual data (user ID) converted to JSON string
         const response = await fetch(TOKEN_SERVER_URL, {
           method: 'POST',
           headers: {
@@ -32,10 +37,12 @@ export function useVoiceAgentConnection(): ConnectionDetails | undefined {
           })
         });
 
+        // Check response status
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        // Parse JSON response
         const data = await response.json();
 
         // Map YOUR response format to what LiveKit expects
@@ -56,5 +63,5 @@ export function useVoiceAgentConnection(): ConnectionDetails | undefined {
     fetchConnectionDetails();
   }, []); // Empty dependency array = run once when component mounts
 
-  return details;
+  return { details, isLoading, error };
 }
